@@ -4,6 +4,17 @@ variable "name" {
   default     = ""
 }
 
+
+variable "app_environment" {
+  description = "Application environment (Examples: dev, nonprod, prod)"
+  type        = string
+}
+
+variable "infra_environment" {
+  description = "Environment for the infrastructure equivalent to Chef Environment (Examples: dpxn-production, mypaycenter-dev)"
+  type        = string
+}
+
 variable "engine" {
   description = "The database engine to use. Examples: aurora, aurora-mysql, aurora-postgresql, mariadb, mysql, oracle-ee, oracle-ee-cdb, oracle-se2, oracle-se2-cdb, postgres, sqlserver-ee, sqlserver-se, sqlserver-ex, sqlserver-web"
   type        = string

@@ -2,14 +2,13 @@ module "aurora" {
   source = "terraform-aws-modules/rds-aurora/aws"
   version = "9.2.0"
 
-  name                                     = var.name
+  name                                     = "${var.name}-${lower(var.infra_environment)}-${var.app_environment}"
   engine                                   = var.engine
   engine_version                           = var.engine_version
   master_username                          = var.master_username
   engine_mode                              = var.engine_mode
   master_password                          = var.master_password
   vpc_id                                   = var.vpc_id
-  #subnet_ids                               = var.subnets
   db_subnet_group_name                     = var.db_subnet_group_name
   enabled_cloudwatch_logs_exports          = var.enabled_cloudwatch_logs_exports
   availability_zones                       = var.availability_zones
@@ -29,4 +28,32 @@ module "aurora" {
   performance_insights_kms_key_id          = var.performance_insights_kms_key_id
   performance_insights_retention_period    = var.performance_insights_retention_period
   tags                                     = var.tags
+}
+
+resource "aws_sns_topic" "default" {
+  name = "${lower(var.name)}-${lower(var.infra_environment)}-${var.app_environment}-rds-events"
+  tags = var.tags
+}
+
+resource "aws_db_event_subscription" "default" {
+  name      = "${lower(var.name)}-${lower(var.infra_environment)}-${var.app_environment}-event-sub"
+  sns_topic = aws_sns_topic.default.arn
+
+  source_type = "db-cluster"
+  source_ids  = [module.aurora.cluster_id.id]
+
+  event_categories = [
+    "availability",
+    "deletion",
+    "failover",
+    "failure",
+    "low storage",
+    "maintenance",
+    "notification",
+    "read replica",
+    "recovery",
+    "restoration",
+  ]
+
+  tags = var.tags
 }
