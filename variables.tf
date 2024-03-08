@@ -4,12 +4,6 @@ variable "name" {
   default     = ""
 }
 
-
-variable "app_environment" {
-  description = "Application environment (Examples: dev, nonprod, prod)"
-  type        = string
-}
-
 variable "infra_environment" {
   description = "Environment for the infrastructure equivalent to Chef Environment (Examples: dpxn-production, mypaycenter-dev)"
   type        = string

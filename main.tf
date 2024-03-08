@@ -2,7 +2,7 @@ module "aurora" {
   source = "terraform-aws-modules/rds-aurora/aws"
   version = "9.2.0"
 
-  name                                     = "${var.name}-${lower(var.infra_environment)}-${var.app_environment}"
+  name                                     = "${var.name}-${lower(var.infra_environment)}"
   engine                                   = var.engine
   engine_version                           = var.engine_version
   master_username                          = var.master_username
@@ -30,30 +30,27 @@ module "aurora" {
   tags                                     = var.tags
 }
 
-resource "aws_sns_topic" "default" {
-  name = "${lower(var.name)}-${lower(var.infra_environment)}-${var.app_environment}-rds-events"
+resource "aws_sns_topic" "this" {
+  name = "${lower(var.name)}-${lower(var.infra_environment)}-rds-events"
   tags = var.tags
 }
 
-resource "aws_db_event_subscription" "default" {
-  name      = "${lower(var.name)}-${lower(var.infra_environment)}-${var.app_environment}-event-sub"
-  sns_topic = aws_sns_topic.default.arn
+resource "aws_db_event_subscription" "this" {
+  name      = "${lower(var.name)}-${lower(var.infra_environment)}-event-subscription"
+  sns_topic = aws_sns_topic.this.arn
 
   source_type = "db-cluster"
-  source_ids  = [module.aurora.cluster_id.id]
+  source_ids  = [module.aurora.cluster_id]
 
   event_categories = [
-    "availability",
     "deletion",
     "failover",
     "failure",
     "low storage",
     "maintenance",
     "notification",
-    "read replica",
     "recovery",
-    "restoration",
   ]
-
-  tags = var.tags
+  enabled  = true
+  tags     = var.tags
 }
